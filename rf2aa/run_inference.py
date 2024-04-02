@@ -3,6 +3,7 @@ import hydra
 import torch
 import torch.nn as nn
 from dataclasses import asdict
+import time
 
 from rf2aa.data.merge_inputs import merge_all
 from rf2aa.data.covale import load_covalent_molecules
@@ -23,9 +24,12 @@ class ModelRunner:
     def __init__(self, config) -> None:
         self.config = config
         initialize_chemdata(self.config.chem_params)
-        FFindexDB = namedtuple("FFindexDB", "index, data")
-        self.ffdb = FFindexDB(read_index(config.database_params.hhdb+'_pdb.ffindex'),
-                              read_data(config.database_params.hhdb+'_pdb.ffdata'))
+        if os.path.exists(os.path.join(f"{self.config.output_path}", f"{self.config.job_name}_raw_data.pt")):
+            self.ffdb = ""
+        else:
+            FFindexDB = namedtuple("FFindexDB", "index, data")
+            self.ffdb = FFindexDB(read_index(config.database_params.hhdb+'_pdb.ffindex'),
+                              read_data(config.database_params.hhdb+'_pdb.ffdata'))   
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.xyz_converter = XYZConverter()
         self.deterministic = config.get("deterministic", False)
@@ -93,6 +97,9 @@ class ModelRunner:
         raw_data = merge_all(protein_inputs, na_inputs, sm_inputs, residues_to_atomize, deterministic=self.deterministic)
         self.raw_data = raw_data
 
+        # Save using torch.save
+        torch.save(raw_data, os.path.join(f"{self.config.output_path}", f"{self.config.job_name}_raw_data.pt"))
+
     def load_model(self):
         self.model = RoseTTAFoldModule(
             **self.config.legacy_model_param,
@@ -149,11 +156,30 @@ class ModelRunner:
                                           f"{self.config.job_name}_aux.pt"))
 
     def infer(self):
+
+        print("CUDA information: ")
+        print(torch.cuda.is_available())
+        print(torch.cuda.device_count())
+        print(torch.cuda.current_device())
+        print(torch.cuda.device(0))
+        print(torch.cuda.get_device_name(0))
+
+        msa_start = time.time()
         self.load_model()
-        self.parse_inference_config()
-        input_feats = self.construct_features()
-        outputs = self.run_model_forward(input_feats)
-        self.write_outputs(input_feats, outputs)
+        if not os.path.exists(os.path.join(f"{self.config.output_path}", f"{self.config.job_name}_raw_data.pt")):
+            self.parse_inference_config()
+        else:
+            self.raw_data = torch.load(os.path.join(f"{self.config.output_path}", f"{self.config.job_name}_raw_data.pt"))
+        msa_end = time.time()
+        print(f"MSA preparation and data loading finished in {msa_end-msa_start} seconds\n")
+
+        if torch.cuda.is_available():
+            prediction_start = time.time()
+            input_feats = self.construct_features()
+            outputs = self.run_model_forward(input_feats)
+            self.write_outputs(input_feats, outputs)
+            end = time.time()
+            print(f"Prediction finished in {end-prediction_start} seconds\n")
 
     def lddt_unbin(self, pred_lddt):
         # calculate lddt prediction loss

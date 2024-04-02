@@ -1,0 +1,56 @@
+#!/bin/bash -l
+#SBATCH --qos=normal
+#SBATCH --partition=standard
+#SBATCH --job-name RFAA
+#SBATCH --mem=100G
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --nodes=1
+#SBATCH --output=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/%j_out.txt
+#SBATCH --error=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/%j_err.txt
+
+# Move to RF-AA directory and activate conda environment
+cd /projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom
+
+# Load miniconda and activate environment
+module load miniconda
+conda activate /projects/ilfgrid/apps/rosettafold_aa_kcd635/mamba_env
+
+# Bin path
+BIN_PATH=/projects/ilfgrid/apps/rosettafold_aa_kcd635/mamba_env/bin
+
+# Directory path to input configs
+DIR_PATH=$1
+
+# Check if argument is a directory
+if [ ! -d "$DIR_PATH" ]; then
+  echo "$DIR_PATH is not a valid directory."
+  exit 1
+fi
+
+# Loop over all .yaml files in the directory
+for full_path in "$DIR_PATH"/*.yaml; do
+  
+  # Check if the file is a regular file
+  if [ ! -f "$full_path" ]; then
+    echo "Skipping $full_path, not a regular file."
+    continue
+  fi
+
+  file=$(basename "$full_path")
+  config_name="${file%.*}"
+  echo "Running MSA prep using $full_path"
+
+  # Copy config to RF folder 
+  CONFIG=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/rf2aa/config/inference/$file
+  cp $full_path $CONFIG
+
+  # Launch inference
+  $BIN_PATH/python -m rf2aa.run_inference --config-name $config_name
+  echo "Done MSA prep for $full_path"
+
+  # Remove config
+  rm $CONFIG
+
+done
+
