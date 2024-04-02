@@ -16,8 +16,11 @@ ruff.toml
 csblast-2.2.3/
 outputs/
 pdb100_2021Mar03/
+pdb100_2021Mar03
 UniRef30_2020_06/
+UniRef30_2020_06
 bfd/
+bfd
 signalp6_fast/
 RFAA_paper_weights.pt
 SE3nv-20240131.sif
@@ -25,3 +28,4 @@ temp/
 RFAA_env/
 .conda/
 mamba_root/
+signalp-6.0_license.txt
