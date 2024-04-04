@@ -2,9 +2,9 @@
 #SBATCH --qos=normal
 #SBATCH --partition=standard
 #SBATCH --job-name RFAA
-#SBATCH --mem=100G
+#SBATCH --mem=64G
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=4
 #SBATCH --nodes=1
 #SBATCH --output=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/%j_out.txt
 #SBATCH --error=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/%j_err.txt
@@ -16,6 +16,9 @@ cd /projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom
 module load miniconda
 conda activate /projects/ilfgrid/apps/rosettafold_aa_kcd635/mamba_env
 
+# Make sure GPU is not visible
+#export CUDA_VISIBLE_DEVICES=""
+
 # Bin path
 BIN_PATH=/projects/ilfgrid/apps/rosettafold_aa_kcd635/mamba_env/bin
 
@@ -23,14 +26,15 @@ BIN_PATH=/projects/ilfgrid/apps/rosettafold_aa_kcd635/mamba_env/bin
 DIR_PATH=$1
 
 # Check if argument is a directory
-if [ ! -d "$DIR_PATH" ]; then
-  echo "$DIR_PATH is not a valid directory."
-  exit 1
-fi
+#if [ ! -d "$DIR_PATH" ]; then
+#  echo "$DIR_PATH is not a valid directory."
+#  exit 1
+#fi
 
 # Loop over all .yaml files in the directory
-for full_path in "$DIR_PATH"/*.yaml; do
-  
+#for full_path in "$DIR_PATH"/*.yaml; do
+while IFS= read -r line; do
+  full_path=$line  
   # Check if the file is a regular file
   if [ ! -f "$full_path" ]; then
     echo "Skipping $full_path, not a regular file."
@@ -52,5 +56,5 @@ for full_path in "$DIR_PATH"/*.yaml; do
   # Remove config
   rm $CONFIG
 
-done
+done < $DIR_PATH
 

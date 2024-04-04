@@ -157,12 +157,15 @@ class ModelRunner:
 
     def infer(self):
 
-        print("CUDA information: ")
-        print(torch.cuda.is_available())
-        print(torch.cuda.device_count())
-        print(torch.cuda.current_device())
-        print(torch.cuda.device(0))
-        print(torch.cuda.get_device_name(0))
+        #print("CUDA information: ", flush=True)
+        #print("torch.cuda.is_available: ", torch.cuda.is_available(), flush=True)
+        #print("torch.cuda.device_count: ", torch.cuda.device_count(), flush=True)
+        #try:
+        #    print("torch.cude.current_device: ", torch.cuda.current_device(), flush=True)
+        #    print("torch.cuda.device(0): ", torch.cuda.device(0), flush=True)
+        #    print("torch.cuda.get_device_name(0): ", torch.cuda.get_device_name(0), flush=True)
+        #except RuntimeError:
+        #    print("CUDA not available!", flush=True)
 
         msa_start = time.time()
         self.load_model()
@@ -171,7 +174,7 @@ class ModelRunner:
         else:
             self.raw_data = torch.load(os.path.join(f"{self.config.output_path}", f"{self.config.job_name}_raw_data.pt"))
         msa_end = time.time()
-        print(f"MSA preparation and data loading finished in {msa_end-msa_start} seconds\n")
+        print(f"MSA preparation and data loading finished in {msa_end-msa_start} seconds\n", flush=True)
 
         if torch.cuda.is_available():
             prediction_start = time.time()
@@ -179,7 +182,7 @@ class ModelRunner:
             outputs = self.run_model_forward(input_feats)
             self.write_outputs(input_feats, outputs)
             end = time.time()
-            print(f"Prediction finished in {end-prediction_start} seconds\n")
+            print(f"Prediction finished in {end-prediction_start} seconds\n", flush=True)
 
     def lddt_unbin(self, pred_lddt):
         # calculate lddt prediction loss
