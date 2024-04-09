@@ -8,6 +8,8 @@
 #SBATCH --nodes=1
 #SBATCH --output=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/%j_out.txt
 #SBATCH --error=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/%j_err.txt
+#SBATCH --nodelist=ilfgridgpun03fl
+
 
 # Move to RF-AA directory and activate conda environment
 cd /projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom
@@ -56,5 +58,6 @@ while IFS= read -r line; do
   # Remove config
   rm $CONFIG
 
+#done
 done < $DIR_PATH
 

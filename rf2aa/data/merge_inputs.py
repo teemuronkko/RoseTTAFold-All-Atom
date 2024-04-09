@@ -133,6 +133,15 @@ def merge_two_inputs(first_input, second_input):
         bond_feats[offset:offset+L, offset:offset+L] = bf
         offset += L
 
+    # If second_input.xyz_t, t1d and mask_t are empty, create tensors with zeroes
+    if second_input.xyz_t.shape[0] == 0:
+        second_input.xyz_t = torch.zeros(second_input.xyz_t.shape[1:], dtype = torch.float32)
+        second_input.xyz_t = torch.unsqueeze(second_input.xyz_t, 0)
+        second_input.t1d = torch.zeros(second_input.t1d.shape[1:], dtype = torch.float32)
+        second_input.t1d = torch.unsqueeze(second_input.t1d, 0)
+        second_input.mask_t = torch.zeros(second_input.mask_t.shape[1:], dtype = torch.bool)
+        second_input.mask_t = torch.unsqueeze(second_input.mask_t, 0)
+
     # merge templates
     xyz_t = torch.cat([first_input.xyz_t, second_input.xyz_t],dim=1)
     t1d = torch.cat([first_input.t1d, second_input.t1d],dim=1)
