@@ -6,15 +6,15 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1             
 #SBATCH --nodes=1   
-#SBATCH --output=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/%j_out.txt
-#SBATCH --error=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/%j_err.txt
+#SBATCH --output=/projects/ilfgrid/apps/RoseTTAFold-All-Atom/temp/logs/%j_out.txt
+#SBATCH --error=/projects/ilfgrid/apps/RoseTTAFold-All-Atom/temp/logs/%j_err.txt
 
 # Load miniconda and mamba modules
 module load miniconda
 module load mamba
 
 # Set paths to RoseTTAFold directory and where the environment should be installed
-RFDIR="/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom"
+RFDIR="/projects/ilfgrid/apps/RoseTTAFold-All-Atom"
 ENV_PATH=$RFDIR/RFAA_env
 cd $RFDIR
 

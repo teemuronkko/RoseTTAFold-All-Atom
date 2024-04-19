@@ -5,7 +5,7 @@ DATADIR="$CONDA_PREFIX/share/psipred_4.01/data"
 export BLASTMAT=/projects/ilfgrid/data/RoseTTAFold-All-Atom/blast-2.2.26/data
 echo $DATADIR
 
-PIPE_DIR="/projects/ilfgrid/apps/rosettafold_aa_kcd635/RoseTTAFold-All-Atom"
+PIPE_DIR="/projects/ilfgrid/apps//RoseTTAFold-All-Atom"
 
 i_a3m="$1"
 o_ss="$2"
