@@ -2,10 +2,11 @@
 # From: https://github.com/RosettaCommons/RoseTTAFold
 
 DATADIR="$CONDA_PREFIX/share/psipred_4.01/data"
-export BLASTMAT=/projects/ilfgrid/data/RoseTTAFold-All-Atom/blast-2.2.26/data
+#DATADIR=/projects/ilfgrid/apps/RoseTTAFold-All-Atom/psipred/data
+export BLASTMAT=/projects/ilfgrid/apps/RoseTTAFold-All-Atom/RFAA_env/share/blast-2.2.26/data/
 echo $DATADIR
 
-PIPE_DIR="/projects/ilfgrid/apps//RoseTTAFold-All-Atom"
+PIPE_DIR="/projects/ilfgrid/apps/RoseTTAFold-All-Atom"
 
 i_a3m="$1"
 o_ss="$2"
@@ -18,9 +19,9 @@ head -n 2 $i_a3m > $ID.fasta
 echo $ID.chk > $ID.pn
 echo $ID.fasta > $ID.sn
 
-makemat -P $ID
-psipred $ID.mtx $DATADIR/weights.dat $DATADIR/weights.dat2 $DATADIR/weights.dat3 > $ID.ss
-psipass2 $DATADIR/weights_p2.dat 1 1.0 1.0 $i_a3m.csb.hhblits.ss2 $ID.ss > $ID.horiz
+$PIPE_DIR/blast-2.2.26/bin/makemat -P $ID
+$PIPE_DIR/psipred/bin/psipred $ID.mtx $DATADIR/weights.dat $DATADIR/weights.dat2 $DATADIR/weights.dat3 > $ID.ss
+$PIPE_DIR/psipred/bin/psipass2 $DATADIR/weights_p2.dat 1 1.0 1.0 $i_a3m.csb.hhblits.ss2 $ID.ss > $ID.horiz
 
 (
 echo ">ss_pred"

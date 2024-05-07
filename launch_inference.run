@@ -1,56 +1,62 @@
 #!/bin/bash -l
-#SBATCH --qos=prio
-#SBATCH --partition=priority
+#SBATCH --qos=normal
+#SBATCH --partition=standard
 #SBATCH --job-name RFAA
-#SBATCH --mem=100G
+#SBATCH --mem=64G
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=4
 #SBATCH --nodes=1
-#SBATCH --output=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/%j_out.txt
-#SBATCH --error=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/%j_err.txt
+#SBATCH --output=/projects/ilfgrid/apps/RoseTTAFold-All-Atom/temp/logs/%j_out.txt
+#SBATCH --error=/projects/ilfgrid/apps/RoseTTAFold-All-Atom/temp/logs/%j_err.txt
 #SBATCH --gres=gpu:a100:1
 
 # Move to RF-AA directory and activate conda environment
-cd /projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom
+cd /projects/ilfgrid/apps/RoseTTAFold-All-Atom
 
-# Load miniconda and activate environment
 module load miniconda
-conda activate /projects/ilfgrid/apps/rosettafold_aa_kcd635/mamba_env
+module load mamba
+
+# Set the directory for mamba to store packages, avoiding the use of your home directory
+export CONDA_PKGS_DIRS=/projects/ilfgrid/apps/RoseTTAFold-All-Atom/.conda/pkgs
+
+conda activate /projects/ilfgrid/apps/RoseTTAFold-All-Atom/RFAA_env
+source activate /projects/ilfgrid/apps/RoseTTAFold-All-Atom/RFAA_env
 
 # Bin path
-BIN_PATH=/projects/ilfgrid/apps/rosettafold_aa_kcd635/mamba_env/bin
+BIN_PATH=/projects/ilfgrid/apps/RoseTTAFold-All-Atom/RFAA_env/bin
 
-# Directory path to input configs
-DIR_PATH=$1
+# Path to config file
+INPUT_YAML=$1
 
-# Check if argument is a directory
-if [ ! -d "$DIR_PATH" ]; then
-  echo "$DIR_PATH is not a valid directory."
-  exit 1
+# Make sure the input file exists
+if [ ! -f $INPUT_YAML ]; then
+    echo "Input file $INPUT_YAML does not exist"
+    exit 1
 fi
 
-# Loop over all .yaml files in the directory
-for full_path in "$DIR_PATH"/*.yaml; do
+# Parse config name
+file=$(basename "$INPUT_YAML")
+config_name="${file%.*}"
+echo "Running inference using $INPUT_YAML"
 
-  # Check if the file is a regular file
-  if [ ! -f "$full_path" ]; then
-    echo "Skipping $full_path, not a regular file."
-    continue
-  fi
+# Copy config to RF folder 
+CONFIG=/projects/ilfgrid/apps/RoseTTAFold-All-Atom/rf2aa/config/inference/$file
+cp $INPUT_YAML $CONFIG
 
-  file=$(basename "$full_path")
-  config_name="${file%.*}"
-  echo "Running inference using $full_path"
+# Launch inference
+$BIN_PATH/python -m rf2aa.run_inference --config-name $config_name
+echo "Done running inference for $INPUT_YAML"
 
-  # Copy config to RF folder 
-  CONFIG=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/rf2aa/config/inference/$file
-  cp $full_path $CONFIG
+# Remove config
+rm $CONFIG
 
-  # Launch inference
-  $BIN_PATH/python -m rf2aa.run_inference --config-name $config_name
-  echo "Done running inference for $full_path"
+# Move log files to output directory
+output_path=$(grep "output_path:" ${INPUT_YAML} | awk '{print $2}' | tr -d '[:space:]')
+output_path=${output_path//\"}
+if [[ $output_path == */ ]]; then
+    output_path=${output_path%?}
+fi
 
-  # Remove config
-  rm $CONFIG
-
-done
+echo -e "Moving log files to $output_path"
+mv /projects/ilfgrid/apps/RoseTTAFold-All-Atom/temp/logs/${SLURM_JOB_ID}_err.txt $output_path/${SLURM_JOB_ID}_err.txt
+mv /projects/ilfgrid/apps/RoseTTAFold-All-Atom/temp/logs/${SLURM_JOB_ID}_out.txt $output_path/${SLURM_JOB_ID}_out.txt

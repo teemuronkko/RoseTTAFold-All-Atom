@@ -1,3 +1,4 @@
+#!/bin/sh
 #SBATCH --partition=standard
 #SBATCH --qos=normal
 #SBATCH --job-name=RFAA_MSA
@@ -9,7 +10,13 @@
 #SBATCH --error=/projects/ilfgrid/apps/RoseTTAFold-All-Atom/temp/logs/%j_err.txt
 
 module load miniconda
-conda activate /projects/ilfgrid/apps/RoseTTAFold-All-Atom/mamba_env
+module load mamba
+
+# Set the directory for mamba to store packages, avoiding the use of your home directory
+export CONDA_PKGS_DIRS=/projects/ilfgrid/apps/RoseTTAFold-All-Atom/.conda/pkgs
+
+conda activate /projects/ilfgrid/apps/RoseTTAFold-All-Atom/RFAA_env
+source activate /projects/ilfgrid/apps/RoseTTAFold-All-Atom/RFAA_env
 
 # Inputs
 in_fasta="$1"
@@ -32,6 +39,11 @@ fi
 base=$(basename $in_fasta)
 base=${base%.*}
 out_dir=$out_dir/$base
+
+# Create the output directory if it doesn't exist
+if [ ! -d $out_dir ]; then
+    mkdir -p $out_dir
+fi
 
 # Resources
 CPU=4

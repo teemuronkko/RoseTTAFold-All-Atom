@@ -6,22 +6,23 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --nodes=1
-#SBATCH --output=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/%j_out.txt
-#SBATCH --error=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/%j_err.txt
+#SBATCH --output=/projects/ilfgrid/apps/Git_projects/RoseTTAFold-All-Atom/temp/logs/%j_out.txt
+#SBATCH --error=/projects/ilfgrid/apps/Git_projects/RoseTTAFold-All-Atom/temp/logs/%j_err.txt
 
 # Move to RF-AA directory and activate conda environment
-cd /projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom
+cd /projects/ilfgrid/apps/RoseTTAFold-All-Atom
 
 # Load miniconda and activate environment
 module load miniconda
-conda activate /projects/ilfgrid/apps/rosettafold_aa_kcd635/mamba_env
+conda activate /projects/ilfgrid/apps/RoseTTAFold-All-Atom/RFAA_env
+
+# Bin path
+BIN_PATH=/projects/ilfgrid/apps/RoseTTAFold-All-Atom/RFAA_env/bin
 
 # Make sure GPU is not visible
 export CUDA_VISIBLE_DEVICES=""
 
-# Bin path
-BIN_PATH=/projects/ilfgrid/apps/rosettafold_aa_kcd635/mamba_env/bin
-
+# Text file containing paths to config files
 CONFIG_PATHS=$1
 
 # Read in config file from the list
@@ -31,7 +32,7 @@ config_name="${file%.*}"
 echo "Running MSA prep using $full_path"
 
 # Copy config to RF folder 
-CONFIG=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/rf2aa/config/inference/$file
+CONFIG=/projects/ilfgrid/apps/RoseTTAFold-All-Atom/rf2aa/config/inference/$file
 cp $full_path $CONFIG
 
 # Launch inference
@@ -42,5 +43,5 @@ echo "Done MSA prep for $full_path"
 rm $CONFIG
 
 # Move log files
-mv "/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/${SLURM_JOB_ID}_err.txt" "/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/${config_name}_MSA_err.txt"
-mv "/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/${SLURM_JOB_ID}_out.txt" "/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/${config_name}_MSA_out.txt"
+mv "/projects/ilfgrid/apps/RoseTTAFold-All-Atom/temp/logs/${SLURM_JOB_ID}_err.txt" "/projects/ilfgrid/apps/RoseTTAFold-All-Atom/temp/logs/${config_name}_MSA_err.txt"
+mv "/projects/ilfgrid/apps/RoseTTAFold-All-Atom/temp/logs/${SLURM_JOB_ID}_out.txt" "/projects/ilfgrid/apps/RoseTTAFold-All-Atom/temp/logs/${config_name}_MSA_out.txt"

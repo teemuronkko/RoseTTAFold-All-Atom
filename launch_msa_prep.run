@@ -6,35 +6,26 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --nodes=1
-#SBATCH --output=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/%j_out.txt
-#SBATCH --error=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/temp/logs/%j_err.txt
-#SBATCH --nodelist=ilfgridgpun03fl
-
+#SBATCH --output=/projects/ilfgrid/apps/RoseTTAFold-All-Atom/temp/logs/%j_out.txt
+#SBATCH --error=/projects/ilfgrid/apps/RoseTTAFold-All-Atom/temp/logs/%j_err.txt
 
 # Move to RF-AA directory and activate conda environment
-cd /projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom
+cd /projects/ilfgrid/apps/RoseTTAFold-All-Atom
 
 # Load miniconda and activate environment
 module load miniconda
-conda activate /projects/ilfgrid/apps/rosettafold_aa_kcd635/mamba_env
-
-# Make sure GPU is not visible
-#export CUDA_VISIBLE_DEVICES=""
+conda activate /projects/ilfgrid/apps/RoseTTAFold-All-Atom/RFAA_env
 
 # Bin path
-BIN_PATH=/projects/ilfgrid/apps/rosettafold_aa_kcd635/mamba_env/bin
+BIN_PATH=/projects/ilfgrid/apps/RoseTTAFold-All-Atom/RFAA_env/bin
+
+# Make sure GPU is not visible
+export CUDA_VISIBLE_DEVICES=""
 
 # Directory path to input configs
 DIR_PATH=$1
 
-# Check if argument is a directory
-#if [ ! -d "$DIR_PATH" ]; then
-#  echo "$DIR_PATH is not a valid directory."
-#  exit 1
-#fi
-
 # Loop over all .yaml files in the directory
-#for full_path in "$DIR_PATH"/*.yaml; do
 while IFS= read -r line; do
   full_path=$line  
   # Check if the file is a regular file
@@ -48,7 +39,7 @@ while IFS= read -r line; do
   echo "Running MSA prep using $full_path"
 
   # Copy config to RF folder 
-  CONFIG=/projects/ilfgrid/people/pqh443/Git_projects/RoseTTAFold-All-Atom/rf2aa/config/inference/$file
+  CONFIG=/projects/ilfgrid/apps/RoseTTAFold-All-Atom/rf2aa/config/inference/$file
   cp $full_path $CONFIG
 
   # Launch inference
@@ -58,6 +49,5 @@ while IFS= read -r line; do
   # Remove config
   rm $CONFIG
 
-#done
-done < $DIR_PATH
+done
 

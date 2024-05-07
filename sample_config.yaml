@@ -1,0 +1,13 @@
+defaults:
+  - base
+job_name: "7XMS"
+output_path: "/projects/ilfgrid/people/pqh443/RFAA_test/7XMS"
+
+loader_params:
+  n_templ: 4
+
+protein_inputs:
+  A:
+    fasta_file: /projects/ilfgrid/people/pqh443/RFAA_test/7XMS_receptor.fasta
+  B:
+    fasta_file: /projects/ilfgrid/people/pqh443/RFAA_test/7XMS_ligand.fasta
