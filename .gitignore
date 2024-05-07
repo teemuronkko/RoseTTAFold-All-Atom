@@ -29,3 +29,6 @@ RFAA_env/
 .conda/
 mamba_root/
 signalp-6.0_license.txt
+*.tar.gz
+psipred/
+blast-2.2.26/
