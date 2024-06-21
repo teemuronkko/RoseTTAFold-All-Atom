@@ -68,3 +68,7 @@ legacy_model_param:
     num_edge_features: 64
     n_heads: 4
     div: 4
+
+hydra:
+  run:
+    dir: "/scratch/${job_name}"
